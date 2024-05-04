@@ -32,8 +32,9 @@ std::string sdl_base_path()
 
 std::string sdl_save_path()
 {
-  char* cstr = SDL_GetPrefPath(".", "nonny");
+  char* cstr = "save";
   std::string result = cstr;
-  SDL_free(cstr);
+  //SDL_free(cstr);
   return result;
 }
+

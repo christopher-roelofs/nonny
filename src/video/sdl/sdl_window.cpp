@@ -41,7 +41,7 @@ SDLWindow::SDLWindow(const WindowSettings& ws)
                               (ws.center ? SDL_WINDOWPOS_CENTERED : ws.x),
                               (ws.center ? SDL_WINDOWPOS_CENTERED : ws.y),
                               ws.width, ws.height,
-                              flags);
+                              SDL_WINDOW_FULLSCREEN_DESKTOP);
   if (!m_window)
     throw SDLError("SDL_CreateWindow");
 

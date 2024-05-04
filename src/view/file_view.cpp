@@ -104,6 +104,17 @@ void FileView::update(unsigned ticks, InputHandler& input)
   else if (mwheel_scroll > 0)
     m_file_selection.smooth_scroll_up();
 
+  // Adding some hotkeys to be used by devices that map gamepads keys
+
+  if (input.was_key_pressed(Keyboard::Key::letter_h))
+      home();
+
+  if (input.was_key_pressed(Keyboard::Key::letter_s))
+      open_saved();
+
+  if (input.was_key_pressed(Keyboard::Key::backspace))
+      up();
+
   if (input.was_key_pressed(Keyboard::Key::tab)) {
     bool back = input.is_key_down(Keyboard::Key::lshift)
       || input.is_key_down(Keyboard::Key::rshift);
@@ -608,3 +619,5 @@ void FileView::draw_tooltips(Renderer& renderer) const
     draw_tooltip(renderer, pt, *m_filename_font, tooltip);
   }
 }
+
+

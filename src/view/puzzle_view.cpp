@@ -51,54 +51,55 @@ constexpr int info_pane_width = 256;
 constexpr int info_pane_slide_speed = 1000;
 const Color info_pane_background_color(123, 175, 212);
 
-PuzzleView::PuzzleView(ViewManager& vm)
-  : View(vm)
+PuzzleView::PuzzleView(ViewManager &vm)
+    : View(vm)
 {
   new_puzzle();
 }
 
-PuzzleView::PuzzleView(ViewManager& vm, int width, int height)
-  : View(vm, width, height)
+PuzzleView::PuzzleView(ViewManager &vm, int width, int height)
+    : View(vm, width, height)
 {
   new_puzzle();
 }
 
-PuzzleView::PuzzleView(ViewManager& vm, const std::string& filename)
-  : View(vm)
+PuzzleView::PuzzleView(ViewManager &vm, const std::string &filename)
+    : View(vm)
 {
   load(filename);
 }
 
-PuzzleView::PuzzleView(ViewManager& vm, const std::string& filename,
+PuzzleView::PuzzleView(ViewManager &vm, const std::string &filename,
                        int width, int height)
-  : View(vm, width, height)
+    : View(vm, width, height)
 {
   load(filename);
 }
 
-PuzzleView::PuzzleView(const PuzzleView& pv)
-  : View(pv.m_mgr),
-    m_puzzle(pv.m_puzzle),
-    m_puzzle_filename(pv.m_puzzle_filename),
-    m_edit_mode(pv.m_edit_mode),
-    m_best_time(pv.m_best_time)
+PuzzleView::PuzzleView(const PuzzleView &pv)
+    : View(pv.m_mgr),
+      m_puzzle(pv.m_puzzle),
+      m_puzzle_filename(pv.m_puzzle_filename),
+      m_edit_mode(pv.m_edit_mode),
+      m_best_time(pv.m_best_time)
 {
   setup_panels();
 }
 
-PuzzleView::PuzzleView(PuzzleView&& pv)
-  : View(pv.m_mgr),
-    m_puzzle(std::move(pv.m_puzzle)),
-    m_puzzle_filename(std::move(pv.m_puzzle_filename)),
-    m_edit_mode(pv.m_edit_mode),
-    m_best_time(pv.m_best_time)
+PuzzleView::PuzzleView(PuzzleView &&pv)
+    : View(pv.m_mgr),
+      m_puzzle(std::move(pv.m_puzzle)),
+      m_puzzle_filename(std::move(pv.m_puzzle_filename)),
+      m_edit_mode(pv.m_edit_mode),
+      m_best_time(pv.m_best_time)
 {
   setup_panels();
 }
 
-PuzzleView& PuzzleView::operator=(const PuzzleView& pv) &
+PuzzleView &PuzzleView::operator=(const PuzzleView &pv) &
 {
-  if (this != &pv) {
+  if (this != &pv)
+  {
     if (&pv.m_mgr != &m_mgr)
       throw std::runtime_error("PuzzleView::operator=: "
                                "cannot assign a PuzzleView from a "
@@ -113,9 +114,10 @@ PuzzleView& PuzzleView::operator=(const PuzzleView& pv) &
   return *this;
 }
 
-PuzzleView& PuzzleView::operator=(PuzzleView&& pv) &
+PuzzleView &PuzzleView::operator=(PuzzleView &&pv) &
 {
-  if (this != &pv) {
+  if (this != &pv)
+  {
     if (&pv.m_mgr != &m_mgr)
       throw std::runtime_error("PuzzleView::operator=: "
                                "cannot assign a PuzzleView from a "
@@ -130,19 +132,21 @@ PuzzleView& PuzzleView::operator=(PuzzleView&& pv) &
   return *this;
 }
 
-void PuzzleView::load(const std::string& filename)
+void PuzzleView::load(const std::string &filename)
 {
   std::ifstream file(filename);
-  if (!file.is_open()) {
+  if (!file.is_open())
+  {
     throw std::runtime_error("PuzzleView::load: "
-                             "could not open puzzle file " + filename);
+                             "could not open puzzle file " +
+                             filename);
   }
 
   m_puzzle_filename = filename;
 
   read_puzzle(file, m_puzzle, file_type(filename));
 
-  //load puzzle progress
+  // load puzzle progress
   std::string id = puzzle_id();
   std::string collection = puzzle_collection();
   PuzzleProgress prog;
@@ -157,9 +161,8 @@ void PuzzleView::load(const std::string& filename)
 
   setup_panels();
 
-  //restore game time
-  auto& ipanel
-    = dynamic_cast<PuzzleInfoPanel&>(m_info_pane.main_panel());
+  // restore game time
+  auto &ipanel = dynamic_cast<PuzzleInfoPanel &>(m_info_pane.main_panel());
   ipanel.time(prog.current_time());
 
   if (prog.is_complete())
@@ -170,11 +173,12 @@ void PuzzleView::load(const std::string& filename)
   handle_color_change();
 }
 
-PuzzleFormat PuzzleView::file_type(const std::string& filename) const
+PuzzleFormat PuzzleView::file_type(const std::string &filename) const
 {
   auto pos = filename.rfind('.');
   std::string extension = "";
-  if (pos != std::string::npos) {
+  if (pos != std::string::npos)
+  {
     extension = filename.substr(pos);
     std::transform(extension.begin(), extension.end(), extension.begin(),
                    to_lower);
@@ -204,7 +208,7 @@ void PuzzleView::new_puzzle()
 
 std::string PuzzleView::puzzle_id() const
 {
-  const std::string* id = m_puzzle.find_property("id");
+  const std::string *id = m_puzzle.find_property("id");
   if (!id)
     id = m_puzzle.find_property("title");
   if (!id)
@@ -215,7 +219,7 @@ std::string PuzzleView::puzzle_id() const
 
 std::string PuzzleView::puzzle_collection() const
 {
-  const std::string* col = m_puzzle.find_property("collection");
+  const std::string *col = m_puzzle.find_property("collection");
   if (col)
     return *col;
   else
@@ -228,19 +232,20 @@ void PuzzleView::save_progress()
   if (m_edit_mode || m_puzzle.is_solved())
     just_completed = true;
 
-  //find collection and id
+  // find collection and id
   std::string id = puzzle_id();
   std::string collection = puzzle_collection();
 
-  //load previous progress
+  // load previous progress
   PuzzleProgress prog;
   m_mgr.save_manager().load_progress(prog, m_puzzle_filename,
                                      collection, id);
 
-  //store current progress
+  // store current progress
   unsigned time = 0;
-  if (!m_edit_mode) {
-    auto& ip = dynamic_cast<const PuzzleInfoPanel&>(m_info_pane.main_panel());
+  if (!m_edit_mode)
+  {
+    auto &ip = dynamic_cast<const PuzzleInfoPanel &>(m_info_pane.main_panel());
     time = ip.time();
   }
   prog.store_progress(m_puzzle, time, just_completed);
@@ -248,17 +253,17 @@ void PuzzleView::save_progress()
   m_mgr.save_manager().save_progress(prog, m_puzzle_filename,
                                      collection, id);
 
-  //clear save flag
-  auto& pp = dynamic_cast<PuzzlePanel&>(m_main_panel.main_panel());
+  // clear save flag
+  auto &pp = dynamic_cast<PuzzlePanel &>(m_main_panel.main_panel());
   pp.clear_save_flag();
 }
 
 void PuzzleView::restart()
 {
-  auto& ipanel = dynamic_cast<PuzzleInfoPanel&>(m_info_pane.main_panel());
+  auto &ipanel = dynamic_cast<PuzzleInfoPanel &>(m_info_pane.main_panel());
   ipanel.time(0);
 
-  auto& ppanel = dynamic_cast<PuzzlePanel&>(m_main_panel.main_panel());
+  auto &ppanel = dynamic_cast<PuzzlePanel &>(m_main_panel.main_panel());
   ppanel.clear_puzzle();
 }
 
@@ -269,45 +274,60 @@ void PuzzleView::save_puzzle(std::string filename)
   else if (filename != m_puzzle_filename)
     m_ask_before_save = false;
 
-  if (filename.empty()) {
+  if (filename.empty())
+  {
     m_mgr.schedule_action(ViewManager::Action::save_puzzle_as);
-  } else {
-    if (m_ask_before_save) {
+  }
+  else
+  {
+    if (m_ask_before_save)
+    {
       std::string fname = stdfs::path(filename).filename().string();
-      auto do_save = [this]() {
+      auto do_save = [this]()
+      {
         m_ask_before_save = false;
         m_mgr.schedule_action(ViewManager::Action::save_puzzle); };
-      auto cancel = [this]() {
-        m_mgr.schedule_action(ViewManager::Action::close_message_box); };
+      auto cancel = [this]()
+      { m_mgr.schedule_action(ViewManager::Action::close_message_box); };
       m_mgr.message_box("Are you sure you want to overwrite the file "
-                        "\"" + fname + "\"?",
+                        "\"" +
+                            fname + "\"?",
                         MessageBoxView::Type::yes_no,
                         do_save, cancel, cancel);
-    } else {
+    }
+    else
+    {
       PuzzleFormat type = file_type(filename);
 
-      if (type == PuzzleFormat::png) {
+      if (type == PuzzleFormat::png)
+      {
         write_puzzle_png(filename, m_puzzle);
-      } else {
+      }
+      else
+      {
         std::ofstream file(filename);
 
         if (file.is_open())
           m_puzzle_filename = filename;
 
-        try {
+        try
+        {
           write_puzzle(file, m_puzzle, file_type(filename));
 
-          //wipe previous puzzle progress and store solution
+          // wipe previous puzzle progress and store solution
           save_progress();
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception &e)
+        {
           std::string err_msg = "Error saving puzzle:\n\n";
           err_msg += e.what();
 
-          //show error message
-          auto close = [this]() {
-            m_mgr.schedule_action(ViewManager::Action::close_message_box); };
-          m_mgr.message_box(err_msg, MessageBoxView::Type::okay,
-                            close, []() { }, []() { });
+          // show error message
+          auto close = [this]()
+          { m_mgr.schedule_action(ViewManager::Action::close_message_box); };
+          m_mgr.message_box(
+              err_msg, MessageBoxView::Type::okay,
+              close, []() {}, []() {});
         }
       }
     }
@@ -316,32 +336,35 @@ void PuzzleView::save_puzzle(std::string filename)
 
 void PuzzleView::update_properties()
 {
-  auto ipanel = dynamic_cast<PuzzleInfoPanel*>(&m_info_pane.main_panel());
+  auto ipanel = dynamic_cast<PuzzleInfoPanel *>(&m_info_pane.main_panel());
   if (ipanel)
     ipanel->refresh_puzzle_properties();
 }
 
 void PuzzleView::set_edit_mode()
 {
-  //find collection and id
+  // find collection and id
   std::string id = puzzle_id();
   std::string collection = puzzle_collection();
 
-  //load progress
+  // load progress
   PuzzleProgress prog;
   m_mgr.save_manager().load_progress(prog, m_puzzle_filename,
                                      collection, id);
 
-  if (!prog.is_complete()) {
-    auto solve = [this]() {
-      m_mgr.schedule_action(ViewManager::Action::solve_and_edit); };
-    auto close = [this]() {
-      m_mgr.schedule_action(ViewManager::Action::close_message_box); };
+  if (!prog.is_complete())
+  {
+    auto solve = [this]()
+    { m_mgr.schedule_action(ViewManager::Action::solve_and_edit); };
+    auto close = [this]()
+    { m_mgr.schedule_action(ViewManager::Action::close_message_box); };
     m_mgr.message_box("The puzzle must be solved before editing. "
                       "Do you want to run the solver now?",
                       MessageBoxView::Type::yes_no,
                       solve, close, close);
-  } else {
+  }
+  else
+  {
     prog.restore_solution(m_puzzle);
     enable_editing();
   }
@@ -358,7 +381,7 @@ void PuzzleView::solve_and_edit()
 
 bool PuzzleView::is_save_needed() const
 {
-  auto ppanel = dynamic_cast<const PuzzlePanel*>(&m_main_panel.main_panel());
+  auto ppanel = dynamic_cast<const PuzzlePanel *>(&m_main_panel.main_panel());
   if (ppanel)
     return ppanel->is_save_needed();
   else
@@ -367,14 +390,11 @@ bool PuzzleView::is_save_needed() const
 
 void PuzzleView::setup_panels()
 {
-  const GameSettings& settings = m_mgr.game_settings();
+  const GameSettings &settings = m_mgr.game_settings();
 
-  std::string font_file = settings.font_dir()
-    + settings.filesystem_separator() + "FreeSans.ttf";
-  std::string bold_font_file = settings.font_dir()
-    + settings.filesystem_separator() + "FreeSansBold.ttf";
-  std::string texture_file = settings.image_dir()
-    + settings.filesystem_separator() + "puzzle.png";
+  std::string font_file = settings.font_dir() + settings.filesystem_separator() + "FreeSans.ttf";
+  std::string bold_font_file = settings.font_dir() + settings.filesystem_separator() + "FreeSansBold.ttf";
+  std::string texture_file = settings.image_dir() + settings.filesystem_separator() + "puzzle.png";
   m_clue_font = m_mgr.video_system().new_font(font_file, 12);
   m_cell_texture = m_mgr.video_system().load_image(m_mgr.renderer(),
                                                    texture_file);
@@ -391,18 +411,15 @@ void PuzzleView::setup_panels()
   m_info_font = m_mgr.video_system().new_font(font_file, 18);
   m_size_font = m_mgr.video_system().new_font(font_file, 24);
 
-  texture_file = settings.image_dir()
-    + settings.filesystem_separator() + "control.png";
+  texture_file = settings.image_dir() + settings.filesystem_separator() + "control.png";
   m_ctrl_texture = m_mgr.video_system().load_image(m_mgr.renderer(),
                                                    texture_file);
 
-  texture_file = settings.image_dir()
-    + settings.filesystem_separator() + "nav.png";
+  texture_file = settings.image_dir() + settings.filesystem_separator() + "nav.png";
   m_arrow_texture = m_mgr.video_system().load_image(m_mgr.renderer(),
                                                     texture_file);
 
-  texture_file = settings.image_dir()
-    + settings.filesystem_separator() + "draw.png";
+  texture_file = settings.image_dir() + settings.filesystem_separator() + "draw.png";
   m_draw_texture = m_mgr.video_system().load_image(m_mgr.renderer(),
                                                    texture_file);
 
@@ -415,50 +432,63 @@ void PuzzleView::setup_panels()
                                                   info_pane_width,
                                                   m_edit_mode);
   ipanel->attach_puzzle(m_puzzle);
-  ipanel->on_menu_open([this]() {
-      m_mgr.schedule_action(ViewManager::Action::open_menu); });
-  ipanel->on_zoom_in([ppanel]() { ppanel->zoom(1); });
-  ipanel->on_zoom_out([ppanel]() { ppanel->zoom(-1); });
-  ipanel->on_hint_toggle([ppanel]() { ppanel->toggle_hints(); });
-  ipanel->on_clear_puzzle([ppanel]() { ppanel->clear_puzzle(); });
+  ipanel->on_menu_open([this]()
+                       { m_mgr.schedule_action(ViewManager::Action::open_menu); });
+  ipanel->on_zoom_in([ppanel]()
+                     { ppanel->zoom(1); });
+  ipanel->on_zoom_out([ppanel]()
+                      { ppanel->zoom(-1); });
+  ipanel->on_hint_toggle([ppanel]()
+                         { ppanel->toggle_hints(); });
+  ipanel->on_clear_puzzle([ppanel]()
+                          { ppanel->clear_puzzle(); });
   ipanel->on_save(std::bind(&PuzzleView::save, this));
-  ipanel->on_undo([ppanel]() { ppanel->undo(); });
-  ipanel->on_redo([ppanel]() { ppanel->redo(); });
-  ipanel->on_analyze([this]() {
+  ipanel->on_undo([ppanel]()
+                  { ppanel->undo(); });
+  ipanel->on_redo([ppanel]()
+                  { ppanel->redo(); });
+  ipanel->on_analyze([this]()
+                     {
       m_draw_tooltips = false;
       m_mgr.schedule_action(ViewManager::Action::analyze_puzzle); });
-  ipanel->on_left([ppanel]() { ppanel->shift_left(); });
-  ipanel->on_right([ppanel]() { ppanel->shift_right(); });
-  ipanel->on_up([ppanel]() { ppanel->shift_up(); });
-  ipanel->on_down([ppanel]() { ppanel->shift_down(); });
-  ipanel->on_data_edit_request([this]() {
-      m_mgr.schedule_action(ViewManager::Action::edit_puzzle_data); });
+  ipanel->on_left([ppanel]()
+                  { ppanel->shift_left(); });
+  ipanel->on_right([ppanel]()
+                   { ppanel->shift_right(); });
+  ipanel->on_up([ppanel]()
+                { ppanel->shift_up(); });
+  ipanel->on_down([ppanel]()
+                  { ppanel->shift_down(); });
+  ipanel->on_data_edit_request([this]()
+                               { m_mgr.schedule_action(ViewManager::Action::edit_puzzle_data); });
   ipanel->on_color_change(std::bind(&PuzzleView::handle_color_change, this));
   ipanel->on_tool_change(std::bind(&PuzzleView::handle_tool_change, this));
   ipanel->start_slide();
   Rect info_region(0, 0, 0, m_height);
   m_info_pane = ScrollingPanel(info_region, ipanel);
 
-  ppanel->on_resize([this, ipanel]() {
+  ppanel->on_resize([this, ipanel]()
+                    {
       m_main_panel.center_main_panel();
-      ipanel->refresh_puzzle_properties();
-    });
+      ipanel->refresh_puzzle_properties(); });
 }
 
 void PuzzleView::handle_color_change()
 {
-  auto* ipanel = dynamic_cast<PuzzleInfoPanel*>(&m_info_pane.main_panel());
-  auto* ppanel = dynamic_cast<PuzzlePanel*>(&m_main_panel.main_panel());
-  if (ipanel && ppanel) {
+  auto *ipanel = dynamic_cast<PuzzleInfoPanel *>(&m_info_pane.main_panel());
+  auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+  if (ipanel && ppanel)
+  {
     ppanel->set_active_color(ipanel->active_color());
   }
 }
 
 void PuzzleView::handle_tool_change()
 {
-  auto* ipanel = dynamic_cast<PuzzleInfoPanel*>(&m_info_pane.main_panel());
-  auto* ppanel = dynamic_cast<PuzzlePanel*>(&m_main_panel.main_panel());
-  if (ipanel && ppanel) {
+  auto *ipanel = dynamic_cast<PuzzleInfoPanel *>(&m_info_pane.main_panel());
+  auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+  if (ipanel && ppanel)
+  {
     ppanel->set_draw_tool(ipanel->active_draw_tool());
   }
 }
@@ -474,40 +504,43 @@ void PuzzleView::save()
 void PuzzleView::enable_editing()
 {
   m_edit_mode = true;
-  auto ppanel = dynamic_cast<PuzzlePanel*>(&m_main_panel.main_panel());
-  auto ipanel = dynamic_cast<PuzzleInfoPanel*>(&m_info_pane.main_panel());
+  auto ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+  auto ipanel = dynamic_cast<PuzzleInfoPanel *>(&m_info_pane.main_panel());
   ppanel->set_edit_mode(true);
   ipanel->set_edit_mode(true);
 
-  //get rid of crosses
-  for (int y = 0; y < m_puzzle.height(); ++y) {
-    for (int x = 0; x < m_puzzle.width(); ++x) {
+  // get rid of crosses
+  for (int y = 0; y < m_puzzle.height(); ++y)
+  {
+    for (int x = 0; x < m_puzzle.width(); ++x)
+    {
       if (m_puzzle[x][y].state == PuzzleCell::State::crossed_out)
         m_puzzle.clear_cell(x, y);
     }
   }
 
-  //restore default palette
+  // restore default palette
   m_puzzle.reset_palette();
   update_properties();
 
   m_ask_before_save = true;
 }
 
-void PuzzleView::update(unsigned ticks, InputHandler& input)
+void PuzzleView::update(unsigned ticks, InputHandler &input)
 {
   m_main_panel.update(ticks, input);
   m_info_pane.update(ticks, input);
 
   int cur_info_width = m_info_pane.boundary().width();
-  if (cur_info_width < info_pane_width) {
+  if (cur_info_width < info_pane_width)
+  {
     cur_info_width += info_pane_slide_speed * ticks / 1000;
 
-    if (cur_info_width >= info_pane_width) {
+    if (cur_info_width >= info_pane_width)
+    {
       cur_info_width = info_pane_width;
 
-      PuzzleInfoPanel* ipanel
-        = dynamic_cast<PuzzleInfoPanel*>(&m_info_pane.main_panel());
+      PuzzleInfoPanel *ipanel = dynamic_cast<PuzzleInfoPanel *>(&m_info_pane.main_panel());
       ipanel->stop_slide();
     }
     m_info_pane.resize(cur_info_width, m_height);
@@ -516,25 +549,112 @@ void PuzzleView::update(unsigned ticks, InputHandler& input)
     m_main_panel.center_main_panel();
   }
 
-  //see if mouse is over info pane
-  //if so we need to allow it to draw tooltips
-  if (input.was_mouse_moved()) {
+  // see if mouse is over info pane
+  // if so we need to allow it to draw tooltips
+  if (input.was_mouse_moved())
+  {
     m_draw_tooltips = false;
-    if (m_info_pane.boundary().contains_point(input.mouse_position())) {
+    if (m_info_pane.boundary().contains_point(input.mouse_position()))
+    {
       m_draw_tooltips = true;
     }
   }
 
-  if (!m_edit_mode && m_puzzle.is_solved()) {
+  if (!m_edit_mode && m_puzzle.is_solved())
+  {
     save_progress();
     m_mgr.schedule_action(ViewManager::Action::show_victory_screen);
   }
 
   if (input.was_key_pressed(Keyboard::Key::escape))
     m_mgr.schedule_action(ViewManager::Action::open_menu);
+
+  // add some hotkeys for handheld devices
+
+  if (input.was_key_pressed(Keyboard::Key::letter_i))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      ppanel->zoom(1);
+    }
+  }
+
+  if (input.was_key_pressed(Keyboard::Key::letter_o))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      ppanel->zoom(-1);
+    }
+  }
+
+  if (input.was_key_pressed(Keyboard::Key::letter_u))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      ppanel->undo();
+    }
+  }
+
+  if (input.was_key_pressed(Keyboard::Key::letter_h))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      ppanel->toggle_hints();
+    }
+  }
+
+  if (input.is_key_down(Keyboard::Key::digit_8))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      // scroll down
+      ppanel->scroll(0, 5);
+    }
+  }
+
+  if (input.is_key_down(Keyboard::Key::digit_2))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      // scroll up
+      ppanel->scroll(0, -5);
+    }
+  }
+
+  if (input.is_key_down(Keyboard::Key::digit_4))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      // scroll right
+      ppanel->scroll(5, 0);
+    }
+  }
+
+  if (input.is_key_down(Keyboard::Key::digit_6))
+  {
+    auto *ppanel = dynamic_cast<PuzzlePanel *>(&m_main_panel.main_panel());
+    if (ppanel)
+    {
+      // scroll left
+      ppanel->scroll(-5, 0);
+    }
+  }
+
+  if (input.was_key_pressed(Keyboard::Key::letter_s))
+  {
+    m_draw_tooltips = false;
+    m_mgr.schedule_action(ViewManager::Action::analyze_puzzle);
+  }
 }
 
-void PuzzleView::draw(Renderer& renderer)
+void PuzzleView::draw(Renderer &renderer)
 {
   m_main_panel.draw(renderer);
 
@@ -542,8 +662,9 @@ void PuzzleView::draw(Renderer& renderer)
   renderer.fill_rect(m_info_pane.boundary());
   m_info_pane.draw(renderer);
 
-  if (m_draw_tooltips) {
-    auto& ipanel = dynamic_cast<PuzzleInfoPanel&>(m_info_pane.main_panel());
+  if (m_draw_tooltips)
+  {
+    auto &ipanel = dynamic_cast<PuzzleInfoPanel &>(m_info_pane.main_panel());
     ipanel.draw_tooltips(renderer, m_width, m_height);
   }
 }
@@ -554,10 +675,13 @@ void PuzzleView::resize(int width, int height)
 
   int info_width = m_info_pane.boundary().width();
   m_info_pane.resize(info_width, height);
-  if (width >= info_width) {
+  if (width >= info_width)
+  {
     m_main_panel.move(info_width, 0);
     m_main_panel.resize(width - info_width, height);
-  } else {
+  }
+  else
+  {
     m_main_panel.move(width, 0);
     m_main_panel.resize(0, height);
   }
@@ -565,31 +689,35 @@ void PuzzleView::resize(int width, int height)
 
 unsigned PuzzleView::time() const
 {
-  auto& ipanel
-    = dynamic_cast<const PuzzleInfoPanel&>(m_info_pane.main_panel());
+  auto &ipanel = dynamic_cast<const PuzzleInfoPanel &>(m_info_pane.main_panel());
   return ipanel.time();
 }
 
-void read_puzzle_png(const std::string& filename, Puzzle& puzzle)
+void read_puzzle_png(const std::string &filename, Puzzle &puzzle)
 {
 }
 
-void write_puzzle_png(const std::string& filename, Puzzle& puzzle)
+void write_puzzle_png(const std::string &filename, Puzzle &puzzle)
 {
-  Uint32* data = new Uint32[puzzle.width() * puzzle.height()];
-  auto* fmt = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA32);
+  Uint32 *data = new Uint32[puzzle.width() * puzzle.height()];
+  auto *fmt = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA32);
 
-  for (int y = 0; y < puzzle.height(); ++y) {
-    for (int x = 0; x < puzzle.width(); ++x) {
+  for (int y = 0; y < puzzle.height(); ++y)
+  {
+    for (int x = 0; x < puzzle.width(); ++x)
+    {
       Uint32 value;
-      if (puzzle[x][y].state == PuzzleCell::State::filled) {
+      if (puzzle[x][y].state == PuzzleCell::State::filled)
+      {
         Color color = puzzle[x][y].color;
         value = static_cast<Uint32>(SDL_MapRGBA(fmt,
                                                 color.red(),
                                                 color.green(),
                                                 color.blue(),
                                                 255));
-      } else {
+      }
+      else
+      {
         value = static_cast<Uint32>(SDL_MapRGBA(fmt, 0, 0, 0, 0));
       }
 
@@ -602,7 +730,7 @@ void write_puzzle_png(const std::string& filename, Puzzle& puzzle)
          bmask = 0x00ff0000,
          amask = 0xff000000;
   SDL_FreeFormat(fmt);
-  SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(static_cast<void*>(data),
+  SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(static_cast<void *>(data),
                                                   puzzle.width(),
                                                   puzzle.height(),
                                                   32, 4 * puzzle.width(),
@@ -613,3 +741,4 @@ void write_puzzle_png(const std::string& filename, Puzzle& puzzle)
   SDL_FreeSurface(surface);
   delete[] data;
 }
+
